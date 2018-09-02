@@ -23,7 +23,7 @@ export class BotResponse {
       const reactee = this.getUser(payload.item_user);
       let reacteeName: string = "Unknown";
       if (reactee !== undefined)
-        reacteeName = reacter.name;
+        reacteeName = reactee.name;
 
       this.slack.api('chat.postMessage', {
         text: `${reacter.name} reacted with a :call_me_hand: on one of ${reacteeName}'s post! _Nice!_`,
