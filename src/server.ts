@@ -26,11 +26,12 @@ export class Server {
       // Each event has to be registered in 
       // https://api.slack.com/apps/<your_id>/event-subscriptions
       const body = req.body.event;
+      console.log(body.type);
       switch (body.type) {
         case "reaction_added":
           this.responses.handleCallMeHandReaction(body);
           break;
-        case "message.app_home":
+        case "message":
           this.responses.handleDirectMessage(body);
           break;
       }

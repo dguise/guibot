@@ -33,12 +33,14 @@ export class BotResponse {
   }
 
   handleDirectMessage(payload: DirectMessage) {
-    console.log("HandleDirectMessage payload: ");
-    console.log(payload);
-    this.slack.api('chat.postMessage', {
-      text: ':middle_finger:',
-      channel: payload.channel
-    }, (err, response) => { });
+    if (payload.channel_type == "app_home") {
+      console.log("HandleDirectMessage payload: ");
+      console.log(payload);
+      this.slack.api('chat.postMessage', {
+        text: ':middle_finger:',
+        channel: payload.channel
+      }, (err, response) => { });
+    }
   }
 
 
