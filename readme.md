@@ -23,7 +23,7 @@
 
 
 # Slack administrative setup
-
+This is only done once, to set up the bot in the Slack UI.
 #### Create app & bot user
 - https://api.slack.com/apps
 - https://api.slack.com/apps/your_id/bots?
@@ -31,7 +31,7 @@
 #### Complete Slack Event Challenge
 https://api.slack.com/apps/your_id/event-subscriptions?
 
-... And add the events you want to listen to
+... And add the events you want to listen to (this has to be done for every new event you'd like to listen to)
 
 #### Add permissions / scope 
 https://api.slack.com/apps/your_id/oauth
