@@ -30,7 +30,9 @@ export class Server {
         case "reaction_added":
           this.responses.handleCallMeHandReaction(body);
           break;
-
+        case "message.app_home":
+          this.responses.handleDirectMessage(body);
+          break;
       }
 
       // If we don't respond to this request, the App will eventually be disabled

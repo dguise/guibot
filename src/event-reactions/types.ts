@@ -48,4 +48,14 @@ export type Member = {
   updated: number,
   is_app_user: boolean,
   has_2fa: boolean
-}
+};
+
+export type DirectMessage = {
+  type: string,
+  user: string,
+  text: string,
+  ts: string,
+  channel: string,
+  event_ts: string,
+  channel_type: string
+};

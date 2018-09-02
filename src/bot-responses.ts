@@ -2,7 +2,7 @@
 // You'll find the token in https://api.slack.com/apps/<your_id>/oauth
 import botToken from "./token";
 import * as Slack from "slack-node";
-import { ReactionAdded, Member } from "./event-reactions/types";
+import { ReactionAdded, Member, DirectMessage } from "./event-reactions/types";
 
 export class BotResponse {
   slack: Slack;
@@ -21,7 +21,7 @@ export class BotResponse {
     if (payload.reaction === "call_me_hand") {
       const reacter = this.getUser(payload.user);
       const reactee = this.getUser(payload.item_user);
-      let reacteeName: string = "Unknown"
+      let reacteeName: string = "Unknown";
       if (reactee !== undefined)
         reacteeName = reacter.name;
 
@@ -30,6 +30,13 @@ export class BotResponse {
         channel:'#botty'
       }, (err, response) => { });
     }
+  }
+
+  handleDirectMessage(payload: DirectMessage) {
+    this.slack.api('chat.postMessage', {
+      text: ':middle_finger:',
+      channel: payload.channel
+    }, (err, response) => { });
   }
 
 
