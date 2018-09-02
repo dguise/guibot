@@ -32,7 +32,14 @@ export class Server {
           this.responses.handleCallMeHandReaction(body);
           break;
         case "message":
+          // this doesn't work. The direct messages doesn't broadcast any event
           this.responses.handleDirectMessage(body);
+          break;
+        case "app_mention":
+          this.responses.handleMention(body);
+          break;
+        case "emoji_changed":
+          this.responses.handleEmojiAdd(body);
           break;
       }
 

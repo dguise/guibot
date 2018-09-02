@@ -59,3 +59,20 @@ export type DirectMessage = {
   event_ts: string,
   channel_type: string
 };
+
+export type Message = {
+  type: string,
+  user: string,
+  text: string,
+  ts: string,
+  channel: string,
+  event_ts: string
+}
+
+export type EmojiAdd = {
+  type: string,
+  subtype: string,
+  name: string,
+  value: string,
+  event_ts : string
+}
