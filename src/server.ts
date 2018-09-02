@@ -22,10 +22,10 @@ export class Server {
         res.send(req.body["challenge"]);
         return;
       }
-        const body = req.body.event;
 
       // Each event has to be registered in 
       // https://api.slack.com/apps/<your_id>/event-subscriptions
+      const body = req.body.event;
       switch (body.type) {
         case "reaction_added":
           this.responses.handleCallMeHandReaction(body);
@@ -34,6 +34,7 @@ export class Server {
       }
 
       // If we don't respond to this request, the App will eventually be disabled
+      // because it assumes our App isn't working.
       res.sendStatus(200);
     });
   }
