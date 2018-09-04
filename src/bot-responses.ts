@@ -10,7 +10,6 @@ export class BotResponse {
 
   constructor() {
     this.slack = new Slack(botToken);
-
     // Cache all users
     this.slack.api('users.list', (err, res) => {
       this.userList = res.members;
@@ -18,28 +17,33 @@ export class BotResponse {
   }
   
   handleCallMeHandReaction(payload: Events.ReactionAdded) {
-    if (payload.reaction === "call_me_hand") {
-      const reacter = this.getUser(payload.user);
-      const reactee = this.getUser(payload.item_user);
-      let reacteeName: string = "Unknown";
-      if (reactee !== undefined)
-        reacteeName = reactee.name;
-
-      this.slack.api('chat.postMessage', {
-        text: `${reacter.name} reacted with a :call_me_hand: on one of ${reacteeName}'s post! _Nice!_`,
-        channel:'#botty'
-      }, (err, response) => { });
-    }
+    console.log(payload.user);
+    this.slack.api('reactions.add', {
+      name: payload.reaction,
+      channel: payload.item.channel,
+      timestamp: payload.item.ts
+    }, (err, res) => { console.log(res); });
   }
 
   handleDirectMessage(payload: Events.DirectMessage) {
-    if (payload.channel_type == "app_home") {
-      console.log("HandleDirectMessage payload: ");
-      console.log(payload);
+    console.log(payload.channel_type);
+    if (payload.channel_type === "app_home") {
       this.slack.api('chat.postMessage', {
         text: ':middle_finger:',
         channel: payload.channel
       }, (err, response) => { });
+    }
+  }
+
+  handleRogerMessage(payload: Events.Message | any) {
+    if (payload.subtype === 'message_deleted') return;
+
+    if (payload.text.indexOf("kom") !== -1) {
+      this.slack.api('reactions.add', {
+        name: 'roger',
+        channel: payload.channel,
+        timestamp: payload.ts
+      }, (err, res) => { console.log(res); });
     }
   }
 

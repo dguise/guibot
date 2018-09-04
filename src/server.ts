@@ -26,7 +26,8 @@ export class Server {
       // Each event has to be registered in 
       // https://api.slack.com/apps/<your_id>/event-subscriptions
       const body = req.body.event;
-      console.log(body.type);
+      console.log("body.event:");
+      console.log(body);
       switch (body.type) {
         case "reaction_added":
           this.responses.handleCallMeHandReaction(body);
@@ -34,6 +35,7 @@ export class Server {
         case "message":
           // this doesn't work. The direct messages doesn't broadcast any event
           this.responses.handleDirectMessage(body);
+          this.responses.handleRogerMessage(body);
           break;
         case "app_mention":
           this.responses.handleMention(body);
