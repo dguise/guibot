@@ -4,6 +4,8 @@ import botToken from "./token";
 import * as Slack from "slack-node";
 import * as Events from "./event-reactions/types";
 
+import * as shell from "shelljs";
+
 export class BotResponse {
   slack: Slack;
   userList: Events.Member[];
@@ -14,6 +16,12 @@ export class BotResponse {
     this.slack.api('users.list', (err, res) => {
       this.userList = res.members;
     });
+    const version = shell.exec("git describe --tags").stdout;
+    const major: number = parseInt(version[1]);
+    this.slack.api('chat.postMessage', {
+      text: `I was just upgraded to version ${major}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      channel: "#botty"
+    }, (err, response) => { });
   }
   
   handleCallMeHandReaction(payload: Events.ReactionAdded) {
