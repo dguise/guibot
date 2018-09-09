@@ -83,9 +83,9 @@ export class BotResponse {
 
   private changeState(enable: boolean, payload: Events.Message) {
     const text = payload.text;
-    if (text.indexOf("roger reactions"))
+    if (text.indexOf("roger reactions") !== -1)
       this.state.ShouldReactRoger = enable;
-    if (text.indexOf("emoji enhancing"))
+    if (text.indexOf("emoji enhancing") !== -1)
       this.state.ShouldEnhanceEmojis = enable;
 
     this.slack.api('reactions.add', {
