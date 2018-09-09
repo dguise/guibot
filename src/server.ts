@@ -30,7 +30,7 @@ export class Server {
       console.log(body);
       switch (body.type) {
         case "reaction_added":
-          this.responses.handleCallMeHandReaction(body);
+          this.responses.handleEmojiReaction(body);
           break;
         case "message":
           // this doesn't work. The direct messages doesn't broadcast any event

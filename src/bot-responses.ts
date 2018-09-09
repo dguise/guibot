@@ -6,12 +6,20 @@ import * as Events from "./event-reactions/types";
 
 import * as shell from "shelljs";
 
+type BotState = {
+  ShouldReactRoger: boolean,
+  ShouldEnhanceEmojis: boolean,
+}
+
 export class BotResponse {
   slack: Slack;
   userList: Events.Member[];
+  state: BotState;
+
 
   constructor() {
     this.slack = new Slack(botToken);
+    this.state = {ShouldEnhanceEmojis: true, ShouldReactRoger: true};
     // Cache all users
     this.slack.api('users.list', (err, res) => {
       this.userList = res.members;
@@ -24,8 +32,9 @@ export class BotResponse {
     }, (err, response) => { });
   }
   
-  handleCallMeHandReaction(payload: Events.ReactionAdded) {
-    console.log(payload.user);
+  handleEmojiReaction(payload: Events.ReactionAdded) {
+    if (!this.state.ShouldEnhanceEmojis) return;
+
     this.slack.api('reactions.add', {
       name: payload.reaction,
       channel: payload.item.channel,
@@ -45,6 +54,7 @@ export class BotResponse {
 
   handleRogerMessage(payload: Events.Message | any) {
     if (payload.subtype === 'message_deleted') return;
+    if (!this.state.ShouldReactRoger) return;
 
     if (payload.text.indexOf("kom") !== -1) {
       this.slack.api('reactions.add', {
@@ -57,17 +67,32 @@ export class BotResponse {
 
   handleMention(payload: Events.Message) {
     const text = payload.text;
-    if (text.indexOf("stardew") !== -1) {
+    if (text.indexOf("enable") !== -1) {
+      this.changeState(true, payload);
+    }
+    else if (text.indexOf("disable") !== -1) {
+      this.changeState(false, payload);
+    }
+    else {
       this.slack.api('chat.postMessage', {
-        text: 'valley!',
-        channel: payload.channel
-      }, (err, response) => { });
-    } else {
-      this.slack.api('chat.postMessage', {
-        text: ':question:',
+        text: 'Sorry, I simply could _not_ understand that. :shrug:',
         channel: payload.channel
       }, (err, response) => { });
     }
+  }
+
+  private changeState(enable: boolean, payload: Events.Message) {
+    const text = payload.text;
+    if (text.indexOf("roger reactions"))
+      this.state.ShouldReactRoger = enable;
+    if (text.indexOf("emoji enhancing"))
+      this.state.ShouldEnhanceEmojis = enable;
+
+    this.slack.api('reactions.add', {
+      name: 'heavy_check_mark',
+      channel: payload.channel,
+      timestamp: payload.ts
+    }, (err, res) => { console.log(res); });
   }
 
   handleEmojiAdd(payload: Events.EmojiAdd) {
