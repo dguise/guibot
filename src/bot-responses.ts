@@ -25,9 +25,10 @@ export class BotResponse {
       this.userList = res.members;
     });
     const version = shell.exec("git describe --tags").stdout;
-    const major: number = parseInt(version[1]);
+    const majorRegex = /\d+/g;
+
     this.slack.api('chat.postMessage', {
-      text: `I was just upgraded to version ${major}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      text: `I was just upgraded to version ${version.match(majorRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
@@ -67,11 +68,18 @@ export class BotResponse {
 
   handleMention(payload: Events.Message) {
     const text = payload.text;
-    if (text.indexOf("enable") !== -1) {
+    text.includes
+    if (text.includes("enable")) {
       this.changeState(true, payload);
     }
-    else if (text.indexOf("disable") !== -1) {
+    else if (text.includes("disable")) {
       this.changeState(false, payload);
+    }
+    else if (text.includes("list")) {
+      this.slack.api('chat.postMessage', {
+        text: 'You can configure ' + this.functionality.join(', '),
+        channel: payload.channel
+      }, (err, response) => { });
     }
     else {
       this.slack.api('chat.postMessage', {
@@ -81,11 +89,14 @@ export class BotResponse {
     }
   }
 
+  private functionality: string[] = 
+    ["roger reactions", 
+    "emoji enhancing",];
   private changeState(enable: boolean, payload: Events.Message) {
     const text = payload.text;
-    if (text.indexOf("roger reactions") !== -1)
+    if (text.includes("roger reactions"))
       this.state.ShouldReactRoger = enable;
-    if (text.indexOf("emoji enhancing") !== -1)
+    if (text.includes("emoji enhancing"))
       this.state.ShouldEnhanceEmojis = enable;
 
     this.slack.api('reactions.add', {
