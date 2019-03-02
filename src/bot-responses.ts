@@ -59,10 +59,23 @@ export class BotResponse {
 
   handleChannelMessage(payload: Events.Message) {
     this.handleRogerMessage(payload);
+    this.handleLitMessage(payload);
   }
 
-  handleRogerMessage(payload: Events.Message | any) {
-    if (payload.subtype === 'message_deleted') return;
+  handleLitMessage(payload: Events.Message) {
+    if ((payload as any).subtype === 'message_deleted') return;
+
+    if (payload.text.toLowerCase().includes("lit")) {
+      this.slack.api('reactions.add', {
+        name: 'fire',
+        channel: payload.channel,
+        timestamp: payload.ts,
+      }, (err, res) => console.log(res));
+    }
+  }
+
+  handleRogerMessage(payload: Events.Message) {
+    if ((payload as any).subtype === 'message_deleted') return;
     if (!this.state.ShouldReactRoger) return;
 
     if (payload.text.includes("kom")) {
