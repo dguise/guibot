@@ -29,10 +29,10 @@ export class BotResponse {
       this.userList = res.members;
     });
     const version = shell.exec("git describe --tags").stdout;
-    const versionRegex = /(\d+\.){3}/g;
+    const versionRegex = /(\d+\.?)+/g;
 
     this.slack.api('chat.postMessage', {
-      text: `I was just restarted to version ${version.match(versionRegex)}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      text: `I was just restarted with version ${version.match(versionRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
