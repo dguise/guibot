@@ -32,7 +32,7 @@ export class BotResponse {
     const versionRegex = /(\d+\.?)+/g;
 
     this.slack.api('chat.postMessage', {
-      text: `I was just restarted with version ${version.match(versionRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      text: `I was just restarted with version v${version.match(versionRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
