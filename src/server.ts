@@ -33,9 +33,9 @@ export class Server {
           this.responses.handleEmojiReaction(body);
           break;
         case "message":
-          // this doesn't work. The direct messages doesn't broadcast any event
-          this.responses.handleDirectMessage(body);
-          this.responses.handleRogerMessage(body);
+          // this doesn't work. The direct messages doesn't broadcast any event. Maybe missing some scope permission
+          // this.responses.handleDirectMessage(body);
+          this.responses.handleChannelMessage(body);
           break;
         case "app_mention":
           this.responses.handleMention(body);

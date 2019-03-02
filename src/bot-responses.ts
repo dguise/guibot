@@ -57,6 +57,10 @@ export class BotResponse {
     }
   }
 
+  handleChannelMessage(payload: Events.Message) {
+    this.handleRogerMessage(payload);
+  }
+
   handleRogerMessage(payload: Events.Message | any) {
     if (payload.subtype === 'message_deleted') return;
     if (!this.state.ShouldReactRoger) return;
