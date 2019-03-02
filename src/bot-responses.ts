@@ -5,6 +5,7 @@ import * as Slack from "slack-node";
 import * as Events from "./event-reactions/types";
 
 import * as shell from "shelljs";
+import { text } from "body-parser";
 
 type BotState = {
   ShouldReactRoger: boolean,
@@ -19,16 +20,19 @@ export class BotResponse {
 
   constructor() {
     this.slack = new Slack(botToken);
-    this.state = {ShouldEnhanceEmojis: true, ShouldReactRoger: true};
+    this.state = { 
+                  ShouldEnhanceEmojis: true
+                , ShouldReactRoger: true
+              };
     // Cache all users
     this.slack.api('users.list', (err, res) => {
       this.userList = res.members;
     });
     const version = shell.exec("git describe --tags").stdout;
-    const majorRegex = /\d+/g;
+    const versionRegex = /(\d+\.){3}/g;
 
     this.slack.api('chat.postMessage', {
-      text: `I was just upgraded to version ${version.match(majorRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      text: `I was just restarted to version ${version.match(versionRegex)}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
@@ -57,7 +61,7 @@ export class BotResponse {
     if (payload.subtype === 'message_deleted') return;
     if (!this.state.ShouldReactRoger) return;
 
-    if (payload.text.indexOf("kom") !== -1) {
+    if (payload.text.includes("kom")) {
       this.slack.api('reactions.add', {
         name: 'roger',
         channel: payload.channel,
