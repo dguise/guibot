@@ -6,6 +6,7 @@ import * as Events from "./event-reactions/types";
 
 import * as shell from "shelljs";
 import { text } from "body-parser";
+import { handleFunnyReaction, getFunniest, getAllFunny } from "./features/funny-points";
 
 type BotState = {
   ShouldReactRoger: boolean,
@@ -17,6 +18,10 @@ export class BotResponse {
   userList: Events.Member[];
   state: BotState;
 
+  // stuff printed by "list"
+  private functionality: string[] = 
+    ["roger reactions", 
+    "emoji enhancing",];
 
   constructor() {
     this.slack = new Slack(botToken);
@@ -37,7 +42,7 @@ export class BotResponse {
     }, (err, response) => { });
   }
   
-  handleEmojiReaction(payload: Events.ReactionAdded) {
+  enhanceEmojis(payload: Events.ReactionAdded) {
     if (!this.state.ShouldEnhanceEmojis) return;
 
     this.slack.api('reactions.add', {
@@ -45,6 +50,11 @@ export class BotResponse {
       channel: payload.item.channel,
       timestamp: payload.item.ts
     }, (err, res) => { console.log(res); });
+  }
+
+  handleEmojiReaction(payload: Events.ReactionAdded) {
+    this.enhanceEmojis(payload);
+    handleFunnyReaction(payload);
   }
 
   handleDirectMessage(payload: Events.DirectMessage) {
@@ -88,8 +98,10 @@ export class BotResponse {
   }
 
   handleMention(payload: Events.Message) {
-    const text = payload.text;
-    text.includes
+    if (!payload.text) return;
+
+    const text = payload.text.toLowerCase();
+    
     if (text.includes("enable")) {
       this.changeState(true, payload);
     }
@@ -97,10 +109,32 @@ export class BotResponse {
       this.changeState(false, payload);
     }
     else if (text.includes("list")) {
-      this.slack.api('chat.postMessage', {
-        text: 'You can configure ' + this.functionality.join(', '),
-        channel: payload.channel
-      }, (err, response) => { });
+      if (text.includes("functionality")) {
+        this.slack.api('chat.postMessage', {
+          text: 'You can configure ' + this.functionality.join(', '),
+          channel: payload.channel
+        }, (err, response) => { });
+      }
+      else if (text.includes("funny")) {
+        const funnyList = getAllFunny();
+        let print = "";
+        for (const funny of funnyList) {
+          const username = this.getUsername(funny.user);
+          print += username + ": " + funny.points + " \r\n";
+        }
+        this.slack.api('chat.postMessage', {
+          text: print,
+          channel: payload.channel
+        }, (err, response) => { });
+      }
+    }
+    else if (text.includes("who")) {
+      if (text.includes("funniest")) {
+        this.slack.api('chat.postMessage', {
+          text: this.getUsername(getFunniest().user) + ' is the funniest! :gladsanders:',
+          channel: payload.channel
+        }, (err, response) => { });
+      }
     }
     else {
       this.slack.api('chat.postMessage', {
@@ -110,9 +144,6 @@ export class BotResponse {
     }
   }
 
-  private functionality: string[] = 
-    ["roger reactions", 
-    "emoji enhancing",];
   private changeState(enable: boolean, payload: Events.Message) {
     const text = payload.text;
     if (text.includes("roger reactions"))
@@ -140,13 +171,19 @@ export class BotResponse {
       }, (err, response) => { });
     }
   }
-
-
-
-
-
   
-  private getUser(id: string) {
-    return this.userList.filter(mem => mem.id === id)[0];
+  private getUser(id: string): Events.Member {
+    const user = this.userList.filter(mem => mem.id === id)[0];
+    return user;
+  }
+
+  private getUsername(id: string): String {
+    const user = this.getUser(id);
+    let username = id;
+
+    if (user)
+      username = user.name; 
+
+    return username;
   }
 }
