@@ -17,6 +17,7 @@ export class BotResponse {
   slack: Slack;
   userList: Events.Member[];
   state: BotState;
+  version: String;
 
   // stuff printed by "list"
   private functionality: string[] = 
@@ -34,10 +35,10 @@ export class BotResponse {
       this.userList = res.members;
     });
     const version = shell.exec("git describe --tags").stdout;
-    const versionRegex = /(\d+\.?)+/g;
+    this.version = version.match(/v(\d+\.?){2}\d+/g)[0];
 
     this.slack.api('chat.postMessage', {
-      text: `I was just restarted with version v${version.match(versionRegex)[0]}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
+      text: `I was just restarted with version ${this.version}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
@@ -132,6 +133,14 @@ export class BotResponse {
       if (text.includes("funniest")) {
         this.slack.api('chat.postMessage', {
           text: this.getUsername(getFunniest().user) + ' is the funniest! :gladsanders:',
+          channel: payload.channel
+        }, (err, response) => { });
+      }
+    }
+    else if (text.includes("what")) {
+      if (text.includes("version")) {
+        this.slack.api('chat.postMessage', {
+          text: 'I\'m version ' + this.version + '! :tada:',
           channel: payload.channel
         }, (err, response) => { });
       }
