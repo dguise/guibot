@@ -136,6 +136,12 @@ export class BotResponse {
           channel: payload.channel
         }, (err, response) => { });
       }
+      else if (text.includes("best")) {
+        this.slack.api('chat.postMessage', {
+          text:'Jesper Norr is the best! :sunglasses:',
+          channel: payload.channel
+        }, (err, response) => { });
+      }
     }
     else if (text.includes("what")) {
       if (text.includes("version")) {
