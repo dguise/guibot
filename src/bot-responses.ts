@@ -203,7 +203,7 @@ export class BotResponse {
   }
 
   private getRandomUsername(): String {
-    var user = this.userList[Math.floor(Math.random() * (20 - 1)) + 1];
+    var user = this.userList[Math.floor(Math.random() * (this.userList.length + 5))];
     var name = 'mrKjell';
     
     if(user)
