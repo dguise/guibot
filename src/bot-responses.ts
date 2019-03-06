@@ -206,7 +206,7 @@ export class BotResponse {
     var user = this.userList[Math.floor(Math.random() * (this.userList.length + 5))];
     var name = 'mrKjell';
     
-    if(user)
+    if (user)
       name = user.name;
       
     return name
