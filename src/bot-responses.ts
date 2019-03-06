@@ -138,7 +138,7 @@ export class BotResponse {
       }
       else if (text.includes("best")) {
         this.slack.api('chat.postMessage', {
-          text:'Jesper Norr is the best! :sunglasses:',
+          text: this.getRandomUsername() + ' is the best! :sunglasses:',
           channel: payload.channel
         }, (err, response) => { });
       }
@@ -200,5 +200,15 @@ export class BotResponse {
       username = user.name; 
 
     return username;
+  }
+
+  private getRandomUsername(): String {
+    var user = this.userList[Math.floor(Math.random() * (10 - 1)) + 1];
+    var name = 'mrKjell';
+    
+    if(user)
+      name = user.name;
+      
+    return name
   }
 }
