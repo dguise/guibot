@@ -18,7 +18,7 @@ export function runMigrations(version: string, slack: Slack) {
         funny.delete("rank");
         agree.delete("rank");
 
-        this.slack.api('chat.postMessage', {
+        slack.api('chat.postMessage', {
             text: "v25 - Tried to clear ranks",
             channel: "#botty-secret"
         }, (err, response) => { });
