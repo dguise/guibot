@@ -32,6 +32,9 @@ export class Server {
         case "reaction_added":
           this.responses.handleEmojiReaction(body);
           break;
+        case "reaction_removed":
+          this.responses.handleEmojiReactionRemoved(body);
+          break;
         case "message":
           // this doesn't work. The direct messages doesn't broadcast any event. Maybe missing some scope permission
           // this.responses.handleDirectMessage(body);

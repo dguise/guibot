@@ -6,11 +6,13 @@ import * as Events from "./event-reactions/types";
 
 import * as shell from "shelljs";
 import { text } from "body-parser";
-import { handleFunnyReaction, getFunniest, getAllFunny } from "./features/funny-points";
+import { handlePointsForReaction, getFunniest, getAllFunny, getAllAgreeable, getMostAgreeable } from "./features/funny-points";
+import { word } from "./util";
 
 type BotState = {
   ShouldReactRoger: boolean,
   ShouldEnhanceEmojis: boolean,
+  ShouldIdentifyLitComments: boolean,
 }
 
 export class BotResponse {
@@ -22,14 +24,16 @@ export class BotResponse {
   // stuff printed by "list"
   private functionality: string[] = 
     ["roger reactions", 
-    "emoji enhancing",];
+    "emoji enhancing",
+    "fire identification"];
 
   constructor() {
     this.slack = new Slack(botToken);
     this.state = { 
-                  ShouldEnhanceEmojis: true
-                , ShouldReactRoger: true
-              };
+      ShouldEnhanceEmojis: false,
+      ShouldReactRoger: false,
+      ShouldIdentifyLitComments: false,
+    };
     // Cache all users
     this.slack.api('users.list', (err, res) => {
       this.userList = res.members;
@@ -55,7 +59,10 @@ export class BotResponse {
 
   handleEmojiReaction(payload: Events.ReactionAdded) {
     this.enhanceEmojis(payload);
-    handleFunnyReaction(payload);
+    handlePointsForReaction(payload);
+  }
+  handleEmojiReactionRemoved(payload: Events.ReactionAdded) {
+    handlePointsForReaction(payload, true);
   }
 
   handleDirectMessage(payload: Events.DirectMessage) {
@@ -76,7 +83,7 @@ export class BotResponse {
   handleLitMessage(payload: Events.Message) {
     if ((payload as any).subtype === 'message_deleted') return;
 
-    if (payload.text.toLowerCase().includes("lit")) {
+    if (payload.text.toLowerCase().match(word("lit"))) {
       this.slack.api('reactions.add', {
         name: 'fire',
         channel: payload.channel,
@@ -89,7 +96,7 @@ export class BotResponse {
     if ((payload as any).subtype === 'message_deleted') return;
     if (!this.state.ShouldReactRoger) return;
 
-    if (payload.text.includes("kom")) {
+    if (payload.text.toLowerCase().match(word("kom"))) {
       this.slack.api('reactions.add', {
         name: 'roger',
         channel: payload.channel,
@@ -117,11 +124,23 @@ export class BotResponse {
         }, (err, response) => { });
       }
       else if (text.includes("funny")) {
-        const funnyList = getAllFunny();
+        const all = getAllFunny();
         let print = "";
-        for (const funny of funnyList) {
-          const username = this.getUsername(funny.user);
-          print += username + ": " + funny.points + " \r\n";
+        for (const rankedUser of all) {
+          const username = this.getUsername(rankedUser.user);
+          print += username + ": " + rankedUser.points + " \r\n";
+        }
+        this.slack.api('chat.postMessage', {
+          text: print,
+          channel: payload.channel
+        }, (err, response) => { });
+      }
+      else if (text.includes("agreeable")) {
+        const all = getAllAgreeable();
+        let print = "";
+        for (const rankedUser of all) {
+          const username = this.getUsername(rankedUser.user);
+          print += username + ": " + rankedUser.points + " \r\n";
         }
         this.slack.api('chat.postMessage', {
           text: print,
@@ -133,6 +152,12 @@ export class BotResponse {
       if (text.includes("funniest")) {
         this.slack.api('chat.postMessage', {
           text: this.getUsername(getFunniest().user) + ' is the funniest! :gladsanders:',
+          channel: payload.channel
+        }, (err, response) => { });
+      }
+      else if (text.includes("most agreeable")) {
+        this.slack.api('chat.postMessage', {
+          text: this.getUsername(getMostAgreeable().user) + ' is the most agreeable! :impressed:',
           channel: payload.channel
         }, (err, response) => { });
       }
@@ -165,6 +190,8 @@ export class BotResponse {
       this.state.ShouldReactRoger = enable;
     if (text.includes("emoji enhancing"))
       this.state.ShouldEnhanceEmojis = enable;
+    if (text.includes("fire identification"))
+      this.state.ShouldIdentifyLitComments = enable;
 
     this.slack.api('reactions.add', {
       name: 'heavy_check_mark',

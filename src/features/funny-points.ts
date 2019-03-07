@@ -1,55 +1,100 @@
 import * as Events from "../event-reactions/types";
 import Database from "object-to-file";
-const db = new Database("funny-people");
+const funnyDb = new Database("funny-people");
+const agreeableDb = new Database("agreeable-people");
 
 type UserRanking = {
     user: string;
     points: number;
 }
-const rank: UserRanking[] = db.read("rank") ? db.read("rank") : [];
+const funnyRank: UserRanking[] = funnyDb.read("rank") ? funnyDb.read("rank") : [];
+const agreeableRank: UserRanking[] = agreeableDb.read("rank") ? funnyDb.read("rank") : [];
 
 
-export function handleFunnyReaction(payload: Events.ReactionAdded) {
-    const emoji = payload.reaction;
+export function handlePointsForReaction(payload: Events.ReactionAdded, remove = false) {
     const user = payload.item_user;
+    const reacter = payload.user;
+    
+    if (user === reacter)
+        return;
 
+    handleFunnyReaction(payload, user, remove);
+    handleAgreeableReaction(payload, user, remove);
+}
+
+function handleFunnyReaction(payload: Events.ReactionAdded, user: string, remove: boolean) {
     let emojiValue = 0;
 
-    switch(emoji) {
-        case "gladsanders":
-            emojiValue = 5;
-            break;
-        case "gladlip":
-            emojiValue = 4;
-            break;
-        case "gladfven":
-            emojiValue = 3;
-            break;
-        case "ehehe":
-            emojiValue = 2;
-            break;
+    if (payload.reaction.startsWith("glad")) {
+        emojiValue = 1;
+    }
+
+    if (emojiValue != 0) {
+        if (remove)
+            emojiValue *= -1;
+
+        addPointsForUser(funnyDb, emojiValue, user);
+    }   
+}
+
+function handleAgreeableReaction(payload: Events.ReactionAdded, user: string, remove: boolean) {
+    let emojiValue = 0;
+
+    switch (payload.reaction) {
         case "+1":
+        case "thumbsup":
         case "uppdutt":
+        case "+":
+        case "++":
+        case "heavy_plus_sign":
+        case "point_up":
+        case "point_up2":
+        case "arrow_up":
+        case "ok_hand":
+        case "heavy_check_mark":
+        case "white_check_mark":
+        case "pogchamp":
+        case "brain3":
+        case "brain4":
+        case "brain":
+        case "fire":
             emojiValue = 1;
             break;
-        case "nerdutt":
         case "-1":
+        case "nerdutt":
+        case "disagree":
+        case "disagree2":
+        case "thumbsdown":
+        case "face_with_one_eyebrow_raised":
+        case "face_with_raised_eyebrow":
+        case "costanza1":
+        case "costanza2":
+        case "ishygddt":
+        case "ishygddt2":
+        case "fu":
+        case "middle_finger":
+        case "reversed_hand_with_middle_finger_extended":
+        case "brain1":
             emojiValue = -1;
             break;
     }
 
-    if (emojiValue != 0)
-        addPointsForUser(emojiValue, user);
+    if (emojiValue != 0) {
+        if (remove)
+            emojiValue *= -1;
+
+        addPointsForUser(agreeableDb, emojiValue, user);
+    }   
 }
 
-function addPointsForUser(points: number, user: string) {
-    var rankedUser = rank.find(x => x.user === user);
+function addPointsForUser(db: Database, points: number, user: string) {
+    var rankedUser = funnyRank.find(x => x.user === user);
     if (rankedUser == null) {
-        rank.push({user, points});
+        funnyRank.push({user, points});
     } else {
         rankedUser.points += points;
     }
-    db.push("rank", rank);
+    db.push("rank", funnyRank);
 }
 
 
@@ -58,10 +103,17 @@ function sortByPoints(a: UserRanking, b: UserRanking): number {
 }
 
 export function getFunniest() {
-    return rank.sort(sortByPoints)[0];
+    return getAllFunny()[0];
 }
 
-
 export function getAllFunny() {
-    return rank.sort(sortByPoints);
+    return funnyRank.sort(sortByPoints);
+}
+
+export function getMostAgreeable() {
+    return getAllAgreeable()[0];
+}
+
+export function getAllAgreeable() {
+    return agreeableRank.sort(sortByPoints);
 }
