@@ -8,7 +8,7 @@ type UserRanking = {
     points: number;
 }
 const funnyRank: UserRanking[] = funnyDb.read("rank") ? funnyDb.read("rank") : [];
-const agreeableRank: UserRanking[] = agreeableDb.read("rank") ? funnyDb.read("rank") : [];
+const agreeableRank: UserRanking[] = agreeableDb.read("rank") ? agreeableDb.read("rank") : [];
 
 
 export function handlePointsForReaction(payload: Events.ReactionAdded, remove = false) {

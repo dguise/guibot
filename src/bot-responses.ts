@@ -42,7 +42,7 @@ export class BotResponse {
     const version = shell.exec("git describe --tags").stdout;
     this.version = version.match(/v(\d+\.?){2}\d+/g)[0];
     
-    runMigrations(this.version);
+    runMigrations(this.version, this.slack);
 
     this.slack.api('chat.postMessage', {
       text: `I was just restarted with version ${this.version}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
