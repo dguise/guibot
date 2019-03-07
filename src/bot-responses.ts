@@ -8,6 +8,7 @@ import * as shell from "shelljs";
 import { text } from "body-parser";
 import { handlePointsForReaction, getFunniest, getAllFunny, getAllAgreeable, getMostAgreeable } from "./features/funny-points";
 import { word } from "./util";
+import { runMigrations } from "./features/migrations";
 
 type BotState = {
   ShouldReactRoger: boolean,
@@ -19,7 +20,7 @@ export class BotResponse {
   slack: Slack;
   userList: Events.Member[];
   state: BotState;
-  version: String;
+  version: string;
 
   // stuff printed by "list"
   private functionality: string[] = 
@@ -40,6 +41,8 @@ export class BotResponse {
     });
     const version = shell.exec("git describe --tags").stdout;
     this.version = version.match(/v(\d+\.?){2}\d+/g)[0];
+    
+    runMigrations(this.version);
 
     this.slack.api('chat.postMessage', {
       text: `I was just restarted with version ${this.version}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
@@ -219,7 +222,7 @@ export class BotResponse {
     return user;
   }
 
-  private getUsername(id: string): String {
+  private getUsername(id: string): string {
     const user = this.getUser(id);
     let username = id;
 
@@ -229,7 +232,7 @@ export class BotResponse {
     return username;
   }
 
-  private getRandomUsername(): String {
+  private getRandomUsername(): string {
     var user = this.userList[Math.floor(Math.random() * (this.userList.length + 5))];
     var name = 'mrKjell';
     
