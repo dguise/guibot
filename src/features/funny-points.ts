@@ -33,7 +33,7 @@ function handleFunnyReaction(payload: Events.ReactionAdded, user: string, remove
         if (remove)
             emojiValue *= -1;
 
-        addPointsForUser(funnyDb, emojiValue, user);
+        addPointsForUser(funnyDb, funnyRank, emojiValue, user);
     }   
 }
 
@@ -83,18 +83,18 @@ function handleAgreeableReaction(payload: Events.ReactionAdded, user: string, re
         if (remove)
             emojiValue *= -1;
 
-        addPointsForUser(agreeableDb, emojiValue, user);
+        addPointsForUser(agreeableDb, agreeableRank, emojiValue, user);
     }   
 }
 
-function addPointsForUser(db: Database, points: number, user: string) {
-    var rankedUser = funnyRank.find(x => x.user === user);
+function addPointsForUser(db: Database, rankList: UserRanking[], points: number, user: string) {
+    var rankedUser = rankList.find(x => x.user === user);
     if (rankedUser == null) {
-        funnyRank.push({user, points});
+        rankList.push({user, points});
     } else {
         rankedUser.points += points;
     }
-    db.push("rank", funnyRank);
+    db.push("rank", rankList);
 }
 
 
