@@ -25,7 +25,9 @@ export function handlePointsForReaction(payload: Events.ReactionAdded, remove = 
 function handleFunnyReaction(payload: Events.ReactionAdded, user: string, remove: boolean) {
     let emojiValue = 0;
 
-    if (payload.reaction.startsWith("glad")) {
+    if (payload.reaction.startsWith("glad") 
+    || payload.reaction == "ehehe"
+    || payload.reaction == "joy") {
         emojiValue = 1;
     }
 
@@ -57,7 +59,8 @@ function handleAgreeableReaction(payload: Events.ReactionAdded, user: string, re
         case "brain3":
         case "brain4":
         case "brain":
-        case "fire":
+        case "proteingasm":
+        case "impressed":
             emojiValue = 1;
             break;
         case "-1":

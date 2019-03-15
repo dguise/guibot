@@ -3,14 +3,6 @@ import * as Slack from "slack-node";
 
 export function runMigrations(version: string, slack: Slack) {
 
-    this.v24 = () => {
-        const funny = new Database("funny-people");
-        const agree = new Database("agreeable-people");
-    
-        funny.truncate();
-        agree.truncate();
-    }
-
     this.v25 = () => {
         const funny = new Database("funny-people");
         const agree = new Database("agreeable-people");
@@ -20,6 +12,16 @@ export function runMigrations(version: string, slack: Slack) {
 
         slack.api('chat.postMessage', {
             text: "v25 - Tried to clear ranks",
+            channel: "#botty-secret"
+        }, (err, response) => { });
+    }
+
+    this.v26 = () => {
+        const agree = new Database("agreeable-people");
+        agree.delete("rank");
+
+        slack.api('chat.postMessage', {
+            text: "v26 - Cleared agreeable",
             channel: "#botty-secret"
         }, (err, response) => { });
     }
