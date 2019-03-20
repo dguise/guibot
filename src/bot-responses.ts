@@ -9,6 +9,8 @@ import { text } from "body-parser";
 import { handlePointsForReaction, getFunniest, getAllFunny, getAllAgreeable, getMostAgreeable } from "./features/funny-points";
 import { word } from "./util";
 import { runMigrations } from "./features/migrations";
+import { Intellecticus } from "./features/brain";
+import { JobRunner } from "./features/jobs";
 
 type BotState = {
   ShouldReactRoger: boolean,
@@ -19,18 +21,19 @@ type BotState = {
 export class BotResponse {
   slack: Slack;
   userList: Events.Member[];
+  intellect: Intellecticus;
   state: BotState;
   version: string;
 
   // stuff printed by "list"
-  private functionality: string[] = 
-    ["roger reactions", 
-    "emoji enhancing",
-    "fire identification"];
+  private functionality: string[] =
+    ["roger reactions",
+      "emoji enhancing",
+      "fire identification"];
 
   constructor() {
     this.slack = new Slack(botToken);
-    this.state = { 
+    this.state = {
       ShouldEnhanceEmojis: false,
       ShouldReactRoger: false,
       ShouldIdentifyLitComments: false,
@@ -41,15 +44,17 @@ export class BotResponse {
     });
     const version = shell.exec("git describe --tags").stdout;
     this.version = version.match(/v(\d+\.?){2}\d+/g)[0];
-    
+
     runMigrations(this.version, this.slack);
+    this.intellect = new Intellecticus();
+    const jobRunner = new JobRunner(this.intellect, this.slack);
 
     this.slack.api('chat.postMessage', {
       text: `I was just restarted with version ${this.version}! :tada: You can find the changelog at https://github.com/dguise/guibot`,
       channel: "#botty"
     }, (err, response) => { });
   }
-  
+
   enhanceEmojis(payload: Events.ReactionAdded) {
     if (!this.state.ShouldEnhanceEmojis) return;
 
@@ -81,6 +86,7 @@ export class BotResponse {
   handleChannelMessage(payload: Events.Message) {
     this.handleRogerMessage(payload);
     this.handleLitMessage(payload);
+    this.intellect.addMessage(payload.text, this.getUsername(payload.user));
   }
 
   handleLitMessage(payload: Events.Message) {
@@ -112,7 +118,7 @@ export class BotResponse {
     if (!payload.text) return;
 
     const text = payload.text.toLowerCase();
-    
+
     if (text.includes("enable")) {
       this.changeState(true, payload);
     }
@@ -216,7 +222,7 @@ export class BotResponse {
       }, (err, response) => { });
     }
   }
-  
+
   private getUser(id: string): Events.Member {
     const user = this.userList.filter(mem => mem.id === id)[0];
     return user;
@@ -227,7 +233,7 @@ export class BotResponse {
     let username = id;
 
     if (user)
-      username = user.name; 
+      username = user.name;
 
     return username;
   }
@@ -235,10 +241,10 @@ export class BotResponse {
   private getRandomUsername(): string {
     var user = this.userList[Math.floor(Math.random() * (this.userList.length + 5))];
     var name = 'mrKjell';
-    
+
     if (user)
       name = user.name;
-      
+
     return name
   }
 }
