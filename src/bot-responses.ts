@@ -91,6 +91,7 @@ export class BotResponse {
 
   handleLitMessage(payload: Events.Message) {
     if ((payload as any).subtype === 'message_deleted') return;
+    if (!this.state.ShouldIdentifyLitComments) return;
 
     if (payload.text.toLowerCase().match(word("lit"))) {
       this.slack.api('reactions.add', {
